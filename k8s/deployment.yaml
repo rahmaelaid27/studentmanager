@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: springboot-app
-        image: springboot-app:1.0
+        image: marwenazouzi12/studentmanager:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8089
@@ -34,10 +34,23 @@ spec:
           value: "8089"
         - name: SERVER_SERVLET_CONTEXT_PATH
           value: "/student"
-        # Paramètres additionnels pour résoudre les problèmes
         - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
           value: "org.hibernate.dialect.MySQL8Dialect"
         - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
           value: "com.mysql.cj.jdbc.Driver"
         - name: SPRING_JPA_DATABASE_PLATFORM
           value: "org.hibernate.dialect.MySQL8Dialect"
+        # Readiness probe pour attendre MySQL
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "nc -z mysql-service 3306"
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        # Optionnel : restart policy
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 10"]
